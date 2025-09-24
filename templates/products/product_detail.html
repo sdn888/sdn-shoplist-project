@@ -72,9 +72,15 @@
                         <a href="{% url 'product_list' %}" class="btn btn-outline-primary">
                             ← Назад к каталогу
                         </a>
-                        <button class="btn btn-primary ms-md-2" onclick="alert('Корзина пока в разработке 🛒')">
-                            📦 В корзину
-                        </button>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary ms-md-2">
+                                📦 В корзину
+                            </a>
+                        {% else %}
+                            <a href="{% url 'login' %}?next={% url 'product_detail' product.id %}" class="btn btn-primary ms-md-2">
+                                📦 В корзину (требуется вход)
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>

@@ -8,9 +8,16 @@ class CustomUserCreationForm(UserCreationForm):
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'password1', 'password2', 'role')
+        fields = ('username', 'email', 'password1', 'password2')
+        # Убрали role из полей регистрации
 
 
 class LoginForm(forms.Form):
-    username = forms.CharField(label="Имя пользователя")
-    password = forms.CharField(widget=forms.PasswordInput, label="Пароль")
+    username = forms.CharField(
+        label="Имя пользователя",
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
+    password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label="Пароль"
+    )
