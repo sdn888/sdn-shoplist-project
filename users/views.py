@@ -48,4 +48,17 @@ def user_logout(request):
 
 @login_required
 def profile(request):
-    return render(request, 'users/profile.html', {'user': request.user})
+    user = request.user
+    stats = {}
+
+    if user.role in ['manager', 'admin']:
+        stats = {
+            'total_products': user.product_set.count(),
+            'active_products': user.product_set.filter(is_active=True).count(),
+            'inactive_products': user.product_set.filter(is_active=False).count(),
+        }
+
+    return render(request, 'users/profile.html', {
+        'user': user,
+        'stats': stats
+    })

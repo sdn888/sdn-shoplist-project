@@ -1,10 +1,116 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load product_filters %}
 
-</body>
-</html>
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'product_list' %}">Главная</a></li>
+            <li class="breadcrumb-item active">Мой профиль</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <span class="display-1">👤</span>
+                    </div>
+                    <h3>{{ user.username }}</h3>
+                    <p class="text-muted">{{ user.get_role_display }}</p>
+
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex justify-content-between">
+                            <span>Email:</span>
+                            <strong>{{ user.email|default:"Не указан" }}</strong>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between">
+                            <span>Дата регистрации:</span>
+                            <strong>{{ user.date_joined|date:"d.m.Y" }}</strong>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between">
+                            <span>Товаров в корзине:</span>
+                            <strong>
+                                {% if user.cart.total_items > 0 %}
+                                    {{ user.cart.total_items }} шт.
+                                {% else %}
+                                    Нет товаров
+                                {% endif %}
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <!-- Статистика для менеджеров -->
+            {% if user.role == 'manager' or user.role == 'admin' %}
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">📊 Статистика менеджера</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="h4 text-primary">
+                                {{ stats.total_products }}
+                            </div>
+                            <small class="text-muted">Всего товаров</small>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="h4 text-success">
+                                {{ stats.active_products }}
+                            </div>
+                            <small class="text-muted">Активных товаров</small>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="h4 text-info">
+                                {{ stats.inactive_products }}
+                            </div>
+                            <small class="text-muted">Неактивных товаров</small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'product_manage' %}" class="btn btn-outline-primary btn-sm">
+                            → Перейти к управлению товарами
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Последние действия -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">📝 Быстрые действия</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'product_list' %}" class="btn btn-outline-primary">
+                            🛍️ Перейти к покупкам
+                        </a>
+
+                        {% if user.cart.total_items > 0 %}
+                        <a href="{% url 'cart_view' %}" class="btn btn-outline-success">
+                            🛒 Перейти в корзину ({{ user.cart.total_items }} шт.)
+                        </a>
+                        {% endif %}
+
+                        {% if user.role == 'manager' or user.role == 'admin' %}
+                        <a href="{% url 'product_add' %}" class="btn btn-outline-warning">
+                            ➕ Добавить новый товар
+                        </a>
+                        {% endif %}
+
+                        <a href="{% url 'logout' %}" class="btn btn-outline-danger">
+                            🚪 Выйти из системы
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
