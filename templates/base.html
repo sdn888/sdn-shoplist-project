@@ -20,6 +20,19 @@
             <div class="navbar-nav ms-auto">
                 {% if user.is_authenticated %}
                     <span class="navbar-text me-3">Привет, {{ user.username }}!</span>
+
+                    {% if user.role == 'manager' or user.role == 'admin' %}
+                    <div class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            Панель управления
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'product_manage' %}">Мои товары</a></li>
+                            <li><a class="dropdown-item" href="{% url 'product_add' %}">Добавить товар</a></li>
+                        </ul>
+                    </div>
+                    {% endif %}
+
                     <a class="nav-link" href="{% url 'profile' %}">Профиль</a>
                     <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
                 {% else %}
