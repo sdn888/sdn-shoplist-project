@@ -68,7 +68,11 @@
     <div class="mb-2">
         <small class="text-muted">
             <strong>Доступен в:</strong>
-            {{ product.get_shops_display|truncatewords:3 }}
+            {% if product.shop_addresses %}
+                {{ product.shop_addresses|truncatewords:3 }}
+            {% else %}
+                Нет в наличии
+            {% endif %}
         </small>
     </div>
 
