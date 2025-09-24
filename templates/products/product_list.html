@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Заголовок и поиск -->
+<div class="row mb-4">
+    <div class="col-md-6">
+      <form method="get" class="d-flex">
+          <input
+              type="text"
+              name="q"
+              class="form-control"
+              placeholder="Поиск товаров..."
+              value="{{ search_query }}"
+          >
+          <button type="submit" class="btn btn-primary ms-2">Найти</button>
+          {% if search_query %}
+              <a href="{% url 'product_list' %}" class="btn btn-outline-secondary ms-2">Сбросить</a>
+          {% endif %}
+      </form>
+  </div>
+</div>
+
+<!-- Добавляем сообщение о результатах поиска После формы поиска, перед списком товаров -->
+{% if search_query %}
+<div class="alert alert-info mt-3">
+    Найдено товаров: {{ products.count }}
+    {% if products.count %} по запросу "{{ search_query }}"{% endif %}
+</div>
+{% endif %}
+
+
+<!-- Список товаров -->
+<div class="row">
+    {% for product in products %}
+    <div class="col-md-4 mb-4">
+        <div class="card product-card h-100">
+            {% if product.image %}
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                <span class="text-muted">Нет изображения</span>
+            </div>
+            {% endif %}
+            
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="card-text flex-grow-1">{{ product.description|truncatewords:15 }}</p>
+                <div class="mt-auto">
+                    <p class="h5 text-primary">{{ product.price }} ₽</p>
+                    <a href="#" class="btn btn-outline-primary w-100">Подробнее</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">Товары пока не добавлены</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+<div class="card-body d-flex flex-column">
+    <h5 class="card-title">{{ product.name }}</h5>
+    <p class="card-text flex-grow-1">{{ product.description|truncatewords:15 }}</p>
+
+    <!-- Отображение магазинов -->
+    <div class="mb-2">
+        <small class="text-muted">
+            <strong>Доступен в:</strong>
+            {{ product.get_shops_display|truncatewords:3 }}
+        </small>
+    </div>
+
+    <div class="mt-auto">
+        <p class="h5 text-primary">{{ product.price }} ₽</p>
+        <a href="#" class="btn btn-outline-primary w-100">Подробнее</a>
+    </div>
+</div>
+
