@@ -20,10 +20,11 @@
             <div class="navbar-nav ms-auto">
                 {% if user.is_authenticated %}
                     <span class="navbar-text me-3">Привет, {{ user.username }}!</span>
-                    <a class="nav-link" href="#">Выйти</a>
+                    <a class="nav-link" href="{% url 'profile' %}">Профиль</a>
+                    <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
                 {% else %}
-                    <a class="nav-link" href="#">Войти</a>
-                    <a class="nav-link" href="#">Регистрация</a>
+                    <a class="nav-link" href="{% url 'login' %}">Войти</a>
+                    <a class="nav-link" href="{% url 'register' %}">Регистрация</a>
                 {% endif %}
             </div>
         </div>
