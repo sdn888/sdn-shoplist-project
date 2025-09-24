@@ -19,7 +19,8 @@ class Product(models.Model):
     # ИСПРАВЛЯЕМ: используем TextField для адресов вместо ManyToMany
     shop_addresses = models.TextField(
         verbose_name="Адреса магазинов",
-        help_text="Перечислите адреса магазинов через запятую"
+        help_text="Перечислите адреса магазинов через точку с запятой (;)",
+        blank = True
     )
     created_by = models.ForeignKey(
         get_user_model(),
@@ -35,7 +36,9 @@ class Product(models.Model):
     def get_shops_display(self):
         """Возвращает форматированный список адресов"""
         if self.shop_addresses:
-            return self.shop_addresses
+            # Разделяем по точке с запятой
+            addresses = [addr.strip() for addr in self.shop_addresses.split(';') if addr.strip()]
+            return ", ".join(addresses)
         return "Нет в наличии"
 
     class Meta:
