@@ -62,7 +62,7 @@
                 <div class="mt-auto">
                     <!-- ИСПРАВЛЕННАЯ СТРОКА: применяем фильтр цены -->
                     <p class="h5 text-primary">{{ product.price|format_price }}</p>
-                    <a href="#" class="btn btn-outline-primary w-100">Подробнее</a>
+                    <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-primary w-100">Подробнее</a>
                 </div>
             </div>
         </div>

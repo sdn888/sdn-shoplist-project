@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load product_filters %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'product_list' %}">Все товары</a></li>
+            <li class="breadcrumb-item active">{{ product.name|truncatewords:3 }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Изображение товара -->
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}"
+                             style="max-height: 500px; object-fit: contain;">
+                    {% else %}
+                        <div class="bg-light rounded d-flex align-items-center justify-content-center"
+                             style="height: 400px;">
+                            <span class="text-muted fs-4">Нет изображения</span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Информация о товаре -->
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h1 class="h2 mb-3">{{ product.name }}</h1>
+
+                    <!-- Цена -->
+                    <div class="mb-4">
+                        <span class="display-6 text-primary">{{ product.price|format_price }}</span>
+                    </div>
+
+                    <!-- Описание -->
+                    <div class="mb-4">
+                        <h3 class="h5">Описание товара</h3>
+                        <p class="text-muted" style="line-height: 1.6;">
+                            {{ product.description|linebreaksbr|default:"Описание отсутствует" }}
+                        </p>
+                    </div>
+
+                    <!-- Магазины -->
+                    {% if product.shop_addresses %}
+                    <div class="mb-4">
+                        <h3 class="h5">📍 Где купить</h3>
+                        <div class="bg-light rounded p-3">
+                            {% with addresses=product.shop_addresses.splitlines %}
+                                {% for address in addresses %}
+                                    {% if address.strip %}
+                                        <div class="mb-2">
+                                            <i class="bi bi-geo-alt text-primary"></i>
+                                            {{ address.strip }}
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endwith %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Кнопки -->
+                    <div class="d-grid gap-2 d-md-flex">
+                        <a href="{% url 'product_list' %}" class="btn btn-outline-primary">
+                            ← Назад к каталогу
+                        </a>
+                        <button class="btn btn-primary ms-md-2" onclick="alert('Корзина пока в разработке 🛒')">
+                            📦 В корзину
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
