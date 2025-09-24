@@ -33,6 +33,18 @@
                     </div>
                     {% endif %}
 
+                    <!-- Ссылка на корзину -->
+                    <a class="nav-link" href="{% url 'cart_view' %}">
+                        🛒 Корзина
+                        {% if user.is_authenticated %}
+                            {% with total_items=user.cart.total_items %}
+                                {% if total_items > 0 %}
+                                    <span class="badge bg-danger">{{ total_items }}</span>
+                                {% endif %}
+                            {% endwith %}
+                        {% endif %}
+                    </a>
+
                     <a class="nav-link" href="{% url 'profile' %}">Профиль</a>
                     <a class="nav-link" href="{% url 'logout' %}">Выйти</a>
                 {% else %}
