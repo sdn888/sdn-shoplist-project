@@ -16,14 +16,42 @@
         <div class="col-lg-6 mb-4">
             <div class="card">
                 <div class="card-body text-center">
+                    <!-- Основное изображение с ID для скрипта -->
                     {% if product.image %}
-                        <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}"
-                             style="max-height: 500px; object-fit: contain;">
+                        <img src="{{ product.image.url }}" class="img-fluid rounded mb-3" alt="{{ product.name }}"
+                             style="max-height: 400px; object-fit: contain;" id="main-product-image">
                     {% else %}
                         <div class="bg-light rounded d-flex align-items-center justify-content-center"
                              style="height: 400px;">
                             <span class="text-muted fs-4">Нет изображения</span>
                         </div>
+                    {% endif %}
+
+                    <!-- УЛУЧШЕННАЯ ГАЛЕРЕЯ ДОПОЛНИТЕЛЬНЫХ ИЗОБРАЖЕНИЙ -->
+                    {% if product.images.all %}
+                    <div class="mt-4">
+                        <h6 class="text-muted mb-3">
+                            📷 Дополнительные фото ({{ product.images.count }})
+                        </h6>
+                        <div class="row g-2 justify-content-center">
+                            {% for product_image in product.images.all %}
+                            <div class="col-4 col-sm-3">
+                                <div class="position-relative">
+                                    <img src="{{ product_image.image.url }}"
+                                         class="img-thumbnail gallery-thumbnail"
+                                         alt="{{ product.name }}"
+                                         style="height: 80px; width: 100%; object-fit: cover; cursor: pointer;"
+                                         onclick="changeMainImage('{{ product_image.image.url }}')"
+                                         onmouseover="this.style.opacity='0.8'"
+                                         onmouseout="this.style.opacity='1'">
+                                    <small class="position-absolute top-0 start-0 bg-dark text-white px-1">
+                                        {{ forloop.counter }}
+                                    </small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                     {% endif %}
                 </div>
             </div>
@@ -35,6 +63,13 @@
                 <div class="card-body">
                     <h1 class="h2 mb-3">{{ product.name }}</h1>
 
+                    <!-- Категория -->
+                    {% if product.category %}
+                    <div class="mb-2">
+                        <span class="badge bg-info text-dark">{{ product.category.name }}</span>
+                    </div>
+                    {% endif %}
+
                     <!-- Цена -->
                     <div class="mb-4">
                         <span class="display-6 text-primary">{{ product.price|format_price }}</span>
@@ -42,7 +77,7 @@
 
                     <!-- Описание -->
                     <div class="mb-4">
-                        <h3 class="h5">Описание товара</h3>
+                        <h3 class="h5">📝 Описание товара</h3>
                         <p class="text-muted" style="line-height: 1.6;">
                             {{ product.description|linebreaksbr|default:"Описание отсутствует" }}
                         </p>
@@ -67,6 +102,18 @@
                     </div>
                     {% endif %}
 
+                    <!-- Информация о товаре -->
+                    <div class="mb-4">
+                        <h3 class="h5">ℹ️ Информация</h3>
+                        <div class="small text-muted">
+                            <div>Добавлен: {{ product.created_at|date:"d.m.Y" }}</div>
+                            {% if product.created_by %}
+                            <div>Продавец: {{ product.created_by.username }}</div>
+                            {% endif %}
+                            <div>Статус: {% if product.is_active %}✅ Активен{% else %}❌ Неактивен{% endif %}</div>
+                        </div>
+                    </div>
+
                     <!-- Кнопки -->
                     <div class="d-grid gap-2 d-md-flex">
                         <a href="{% url 'product_list' %}" class="btn btn-outline-primary">
@@ -82,9 +129,64 @@
                             </a>
                         {% endif %}
                     </div>
+
+                    <!-- Для менеджеров - ссылка на редактирование -->
+                    {% if user.is_authenticated and user.role == 'manager' or user.role == 'admin' %}
+                    <div class="mt-3 pt-3 border-top">
+                        <a href="{% url 'product_edit' product.id %}" class="btn btn-outline-warning btn-sm">
+                            ✏️ Редактировать товар
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .gallery-thumbnail {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    .gallery-thumbnail:hover {
+        border-color: #0d6efd;
+        transform: scale(1.05);
+    }
+    .gallery-thumbnail.active {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+</style>
+
+<script>
+    function changeMainImage(imageUrl) {
+        const mainImage = document.getElementById('main-product-image');
+        if (mainImage) {
+            // Добавляем анимацию смены изображения
+            mainImage.style.opacity = '0.7';
+            setTimeout(() => {
+                mainImage.src = imageUrl;
+                mainImage.style.opacity = '1';
+            }, 150);
+        }
+
+        // Подсвечиваем активную миниатюру
+        const thumbnails = document.querySelectorAll('.gallery-thumbnail');
+        thumbnails.forEach(thumb => {
+            thumb.classList.remove('active');
+            if (thumb.src.includes(imageUrl)) {
+                thumb.classList.add('active');
+            }
+        });
+    }
+
+    // Автоматически активируем первую миниатюру при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        const firstThumbnail = document.querySelector('.gallery-thumbnail');
+        if (firstThumbnail) {
+            firstThumbnail.classList.add('active');
+        }
+    });
+</script>
 {% endblock %}

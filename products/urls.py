@@ -1,5 +1,10 @@
 from django.urls import path
 from . import views
+from django.conf.urls import handler403, handler404, handler500
+
+handler403 = 'products.views.handler403'
+handler404 = 'products.views.handler404'
+handler500 = 'products.views.handler500'
 
 urlpatterns = [
     path('', views.product_list, name='product_list'),
@@ -16,3 +21,5 @@ urlpatterns = [
     path('cart/add/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
     path('cart/remove/<int:product_id>/', views.remove_from_cart, name='remove_from_cart'),
 ]
+
+

@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card">
@@ -30,6 +31,44 @@
                     </div>
                     {% endfor %}
 
+                    <!-- ДОБАВЛЯЕМ ПОЛЕ ДЛЯ МНОЖЕСТВЕННОЙ ЗАГРУЗКИ ИЗОБРАЖЕНИЙ -->
+                    <div class="mb-3">
+                        <label for="images" class="form-label">
+                            Дополнительные изображения
+                            <span class="text-muted">(максимум 6)</span>
+                        </label>
+                        <input type="file" name="images" class="form-control" multiple
+                               accept="image/*" id="images">
+                        <div class="form-text">
+                            Выберите до 6 дополнительных изображений для товара.
+                            Поддерживаются форматы: JPG, PNG, GIF.
+                        </div>
+                    </div>
+
+                    <!-- ЕСЛИ РЕДАКТИРУЕМ ТОВАР - ПОКАЗЫВАЕМ СУЩЕСТВУЮЩИЕ ИЗОБРАЖЕНИЯ -->
+                    {% if product and product.images.all %}
+                    <div class="mb-3">
+                        <label class="form-label">Существующие дополнительные изображения:</label>
+                        <div class="row g-2">
+                            {% for product_image in product.images.all %}
+                            <div class="col-3">
+                                <div class="card">
+                                    <img src="{{ product_image.image.url }}" class="card-img-top"
+                                         alt="Изображение {{ forloop.counter }}"
+                                         style="height: 100px; object-fit: cover;">
+                                    <div class="card-body p-2 text-center">
+                                        <small class="text-muted">#{{ product_image.order }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="form-text">
+                            Новые изображения будут добавлены к существующим.
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-primary">Сохранить</button>
                         <a href="{% url 'product_manage' %}" class="btn btn-outline-secondary">Отмена</a>
@@ -53,5 +92,26 @@
         background-color: #0d6efd;
         border-color: #0d6efd;
     }
+    /* Стили для поля множественной загрузки */
+    input[type="file"]:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
 </style>
+
+<!-- Скрипт для ограничения количества файлов -->
+<script>
+    document.getElementById('images').addEventListener('change', function(e) {
+        const files = e.target.files;
+        if (files.length > 6) {
+            alert('Можно выбрать не более 6 файлов. Будут загружены только первые 6.');
+            // Оставляем только первые 6 файлов
+            const fileList = new DataTransfer();
+            for (let i = 0; i < 6; i++) {
+                fileList.items.add(files[i]);
+            }
+            e.target.files = fileList.files;
+        }
+    });
+</script>
 {% endblock %}
