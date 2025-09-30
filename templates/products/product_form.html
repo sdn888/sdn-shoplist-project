@@ -1,103 +1,154 @@
 {% extends 'base.html' %}
 
+{% block extra_css %}
+<style>
+    /* Стили для множественного выбора магазинов */
+    .select-multiple {
+        min-height: 150px;
+    }
+
+    .select-multiple option {
+        padding: 8px 12px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .select-multiple option:hover {
+        background-color: #f8f9fa;
+    }
+
+    .select-multiple option:checked {
+        background-color: #0d6efd !important;
+        color: white !important;
+    }
+
+    /* Убираем стандартный синий фон в Firefox */
+    .select-multiple option:checked {
+        background-color: #0d6efd !important;
+        color: white !important;
+    }
+
+    /* Стили для Webkit браузеров (Chrome, Safari) */
+    .select-multiple option:checked {
+        background: linear-gradient(#0d6efd, #0d6efd);
+        color: white;
+    }
+
+    .form-label {
+        font-weight: 500;
+    }
+
+    .help-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">{{ title|default:"Форма товара" }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
 
-<div class="row justify-content-center">
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h4 class="mb-0">{{ title|default:"Форма товара" }}</h4>
-            </div>
-            <div class="card-body">
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
+                        {% for field in form %}
+                        <div class="mb-3">
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {{ field.label }}
+                                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
 
-                    {% for field in form %}
-                    <div class="mb-3">
-                        <label for="{{ field.id_for_label }}" class="form-label">
-                            {{ field.label }}
-                            {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
-                        </label>
+                            {{ field }}
 
-                        {{ field }}
+                            {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
 
-                        {% if field.help_text %}
-                        <div class="form-text">{{ field.help_text }}</div>
-                        {% endif %}
-
-                        {% for error in field.errors %}
-                        <div class="text-danger small">{{ error }}</div>
-                        {% endfor %}
-                    </div>
-                    {% endfor %}
-
-                    <!-- ДОБАВЛЯЕМ ПОЛЕ ДЛЯ МНОЖЕСТВЕННОЙ ЗАГРУЗКИ ИЗОБРАЖЕНИЙ -->
-                    <div class="mb-3">
-                        <label for="images" class="form-label">
-                            Дополнительные изображения
-                            <span class="text-muted">(максимум 6)</span>
-                        </label>
-                        <input type="file" name="images" class="form-control" multiple
-                               accept="image/*" id="images">
-                        <div class="form-text">
-                            Выберите до 6 дополнительных изображений для товара.
-                            Поддерживаются форматы: JPG, PNG, GIF.
-                        </div>
-                    </div>
-
-                    <!-- ЕСЛИ РЕДАКТИРУЕМ ТОВАР - ПОКАЗЫВАЕМ СУЩЕСТВУЮЩИЕ ИЗОБРАЖЕНИЯ -->
-                    {% if product and product.images.all %}
-                    <div class="mb-3">
-                        <label class="form-label">Существующие дополнительные изображения:</label>
-                        <div class="row g-2">
-                            {% for product_image in product.images.all %}
-                            <div class="col-3">
-                                <div class="card">
-                                    <img src="{{ product_image.image.url }}" class="card-img-top"
-                                         alt="Изображение {{ forloop.counter }}"
-                                         style="height: 100px; object-fit: cover;">
-                                    <div class="card-body p-2 text-center">
-                                        <small class="text-muted">#{{ product_image.order }}</small>
-                                    </div>
-                                </div>
+                            <!-- Специальная подсказка для выбора магазинов -->
+                            {% if field.name == 'shops' %}
+                            <div class="help-text">
+                                💡 Удерживайте Ctrl (Cmd на Mac) для выбора нескольких магазинов
                             </div>
+                            {% endif %}
+
+                            {% for error in field.errors %}
+                            <div class="text-danger small">{{ error }}</div>
                             {% endfor %}
                         </div>
-                        <div class="form-text">
-                            Новые изображения будут добавлены к существующим.
+                        {% endfor %}
+
+                        <!-- ДОБАВЛЯЕМ ПОЛЕ ДЛЯ МНОЖЕСТВЕННОЙ ЗАГРУЗКИ ИЗОБРАЖЕНИЙ -->
+                        <div class="mb-3">
+                            <label for="images" class="form-label">
+                                Дополнительные изображения
+                                <span class="text-muted">(максимум 6)</span>
+                            </label>
+                            <input type="file" name="images" class="form-control" multiple
+                                   accept="image/*" id="images">
+                            <div class="form-text">
+                                Выберите до 6 дополнительных изображений для товара.
+                                Поддерживаются форматы: JPG, PNG, GIF.
+                            </div>
                         </div>
-                    </div>
-                    {% endif %}
 
-                    <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-primary">Сохранить</button>
-                        <a href="{% url 'product_manage' %}" class="btn btn-outline-secondary">Отмена</a>
-
-                        {% if product %}
-                        <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-info ms-auto">Просмотр</a>
+                        <!-- ЕСЛИ РЕДАКТИРУЕМ ТОВАР - ПОКАЗЫВАЕМ СУЩЕСТВУЮЩИЕ ИЗОБРАЖЕНИЯ -->
+                        {% if product and product.images.all %}
+                        <div class="mb-3">
+                            <label class="form-label">Существующие дополнительные изображения:</label>
+                            <div class="row g-2">
+                                {% for product_image in product.images.all %}
+                                <div class="col-3">
+                                    <div class="card">
+                                        <img src="{{ product_image.image.url }}" class="card-img-top"
+                                             alt="Изображение {{ forloop.counter }}"
+                                             style="height: 100px; object-fit: cover;">
+                                        <div class="card-body p-2 text-center">
+                                            <small class="text-muted">#{{ product_image.order }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="form-text">
+                                Новые изображения будут добавлены к существующим.
+                            </div>
+                        </div>
                         {% endif %}
-                    </div>
-                </form>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Сохранить товар</button>
+                            <a href="{% url 'product_manage' %}" class="btn btn-outline-secondary">Отмена</a>
+
+                            {% if product %}
+                            <a href="{% url 'product_detail' product.id %}" class="btn btn-outline-info ms-auto">Просмотр товара</a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Подсказка по использованию -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6>💡 Советы по заполнению:</h6>
+                    <ul class="small mb-0">
+                        <li>Для выбора нескольких магазинов удерживайте <kbd>Ctrl</kbd> (Windows) или <kbd>Cmd</kbd> (Mac)</li>
+                        <li>Можно выбрать до 6 дополнительных изображений к товару</li>
+                        <li>Основное изображение будет отображаться первым в галерее</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .form-control:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-    }
-    .form-check-input:checked {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
-    }
-    /* Стили для поля множественной загрузки */
-    input[type="file"]:focus {
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-    }
-</style>
 
 <!-- Скрипт для ограничения количества файлов -->
 <script>
@@ -105,12 +156,34 @@
         const files = e.target.files;
         if (files.length > 6) {
             alert('Можно выбрать не более 6 файлов. Будут загружены только первые 6.');
-            // Оставляем только первые 6 файлов
             const fileList = new DataTransfer();
             for (let i = 0; i < 6; i++) {
                 fileList.items.add(files[i]);
             }
             e.target.files = fileList.files;
+        }
+    });
+
+    // Улучшение множественного выбора
+    document.addEventListener('DOMContentLoaded', function() {
+        const shopSelect = document.querySelector('select[name="shops"]');
+        if (shopSelect) {
+            // Добавляем индикатор количества выбранных магазинов
+            function updateSelectedCount() {
+                const selectedCount = Array.from(shopSelect.selectedOptions).length;
+                const label = document.querySelector('label[for="' + shopSelect.id + '"]');
+                if (label) {
+                    const countSpan = label.querySelector('.selected-count') || document.createElement('span');
+                    countSpan.className = 'selected-count badge bg-info ms-2';
+                    countSpan.textContent = 'Выбрано: ' + selectedCount;
+                    if (!label.querySelector('.selected-count')) {
+                        label.appendChild(countSpan);
+                    }
+                }
+            }
+
+            shopSelect.addEventListener('change', updateSelectedCount);
+            updateSelectedCount(); // Инициализация
         }
     });
 </script>

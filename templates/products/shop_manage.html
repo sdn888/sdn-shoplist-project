@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Навигация между товарами и магазинами -->
+    <div class="mb-4">
+        <div class="btn-group">
+            <a href="{% url 'product_manage' %}" class="btn btn-outline-primary">📦 Товары</a>
+            <a href="{% url 'shop_manage' %}" class="btn btn-outline-success active">🏪 Магазины</a>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">🏪 Управление магазинами</h1>
+        <a href="{% url 'shop_add' %}" class="btn btn-primary">
+            ➕ Добавить магазин
+        </a>
+    </div>
+
+    {% if shops %}
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Адрес</th>
+                            <th>Телефон</th>
+                            <th>Часы работы</th>
+                            <th>Добавлен</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for shop in shops %}
+                        <tr>
+                            <td>
+                                <strong>{{ shop.name }}</strong>
+                            </td>
+                            <td>{{ shop.address|truncatewords:5 }}</td>
+                            <td>
+                                {% if shop.phone %}
+                                    {{ shop.phone }}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if shop.opening_hours %}
+                                    {{ shop.opening_hours }}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ shop.created_at|date:"d.m.Y" }}</td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{% url 'shop_edit' shop.id %}" class="btn btn-outline-warning" title="Редактировать">
+                                        ✏️
+                                    </a>
+                                    <a href="{% url 'shop_delete' shop.id %}" class="btn btn-outline-danger" title="Удалить">
+                                        🗑️
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-shop" style="font-size: 4rem; color: #6c757d;"></i>
+        </div>
+        <h3 class="text-muted">Магазины не найдены</h3>
+        <p class="text-muted">Добавьте свой первый магазин для продажи товаров</p>
+        <a href="{% url 'shop_add' %}" class="btn btn-primary mt-3">Добавить магазин</a>
+    </div>
+    {% endif %}
+
+    <!-- Навигация -->
+    <div class="mt-4">
+        <a href="{% url 'product_manage' %}" class="btn btn-outline-secondary">
+            ← Назад к управлению товарами
+        </a>
+    </div>
+</div>
+{% endblock %}

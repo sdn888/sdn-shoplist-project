@@ -1,12 +1,13 @@
-from django.http import HttpResponseForbidden
-from functools import wraps
+from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import redirect
+from django.contrib import messages
 
 def manager_required(view_func):
-    @wraps(view_func)
-    def _wrapped_view(request, *args, **kwargs):
+    def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
-            return HttpResponseForbidden("Требуется авторизация.")
-        if request.user.role not in ['manager', 'admin']:
-            return HttpResponseForbidden("Доступ запрещен. Требуются права менеджера.")
+            return redirect('login')
+        if not hasattr(request.user, 'role') or request.user.role not in ['manager', 'admin']:
+            messages.error(request, 'У вас нет прав для доступа к этой странице.')
+            return redirect('product_list')
         return view_func(request, *args, **kwargs)
-    return _wrapped_view
+    return wrapper

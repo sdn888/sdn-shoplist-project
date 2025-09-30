@@ -1,0 +1,21 @@
+{% for item in categories_tree %}
+<div class="category-item">
+    <div class="form-check">
+        <input class="form-check-input category-radio"
+               type="radio"
+               name="category"
+               value="{{ item.category.id }}"
+               id="category_{{ item.category.id }}"
+               {% if selected_category == item.category.id|stringformat:'i' %}checked{% endif %}>
+        <label class="form-check-label" for="category_{{ item.category.id }}">
+            {{ item.category.name }}
+        </label>
+    </div>
+
+    {% if item.children %}
+    <div class="category-children">
+        {% include 'products/category_tree.html' with categories_tree=item.children selected_category=selected_category %}
+    </div>
+    {% endif %}
+</div>
+{% endfor %}

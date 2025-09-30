@@ -4,10 +4,10 @@ register = template.Library()
 
 @register.filter
 def format_price(value):
-    """Форматирует цену с разделителями тысяч"""
+    """Форматирует цену в читаемый вид"""
     try:
-        price = float(value)
-        # Форматируем: 89990 → "89 990,00 ₽"
-        return "{:,.2f} ₽".format(price).replace(",", " ").replace(".", ",")
+        if value is None:
+            return "0 ₽"
+        return f"{float(value):,.2f} ₽".replace(',', ' ').replace('.', ',')
     except (ValueError, TypeError):
-        return f"{value} ₽"
+        return "0 ₽"

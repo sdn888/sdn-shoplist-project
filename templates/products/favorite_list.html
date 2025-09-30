@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load product_filters %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3">❤️ Мои избранные товары</h1>
+        <a href="{% url 'product_list' %}" class="btn btn-outline-primary">
+            ← Вернуться к каталогу
+        </a>
+    </div>
+
+    {% if favorites %}
+    <div class="row">
+        {% for favorite in favorites %}
+        <div class="col-md-4 mb-4">
+            <div class="card product-card h-100">
+                {% if favorite.product.image %}
+                <img src="{{ favorite.product.image.url }}" class="card-img-top" alt="{{ favorite.product.name }}"
+                     style="height: 200px; object-fit: cover;">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <span class="text-muted">Нет изображения</span>
+                </div>
+                {% endif %}
+
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title">{{ favorite.product.name }}</h5>
+                        <a href="{% url 'remove_from_favorite' favorite.product.id %}"
+                           class="btn btn-danger btn-sm"
+                           title="Удалить из избранного"
+                           onclick="return confirm('Удалить товар из избранного?')">
+                            ❤️
+                        </a>
+                    </div>
+
+                    {% if favorite.product.category %}
+                    <div class="mb-2">
+                        <span class="badge bg-info text-dark">{{ favorite.product.category.name }}</span>
+                    </div>
+                    {% endif %}
+
+                    <p class="card-text flex-grow-1">{{ favorite.product.description|truncatewords:15|default:"Описание отсутствует" }}</p>
+
+                    {% if favorite.product.shops.all %}
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <strong>Доступен в:</strong>
+                            {% for shop in favorite.product.shops.all %}
+                                {{ shop.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </small>
+                    </div>
+                    {% endif %}
+
+                    <div class="mt-auto">
+                        <p class="h5 text-primary">{{ favorite.product.price|format_price }}</p>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'product_detail' favorite.product.id %}" class="btn btn-outline-primary">
+                                Подробнее
+                            </a>
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'add_to_cart' favorite.product.id %}" class="btn btn-primary">
+                                    📦 В корзину
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-heart" style="font-size: 4rem; color: #6c757d;"></i>
+        </div>
+        <h3 class="text-muted">В избранном пока пусто</h3>
+        <p class="text-muted">Добавляйте товары в избранное, чтобы не потерять их!</p>
+        <a href="{% url 'product_list' %}" class="btn btn-primary mt-3">Перейти к каталогу</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

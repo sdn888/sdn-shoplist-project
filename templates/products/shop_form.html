@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">ДОБАВИТЬ МАГАЗИН - ТЕСТ</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Простейшая форма БЕЗ ВСЯКОЙ ЛОГИКИ -->
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label">Название магазина</label>
+                            <input type="text" class="form-control" name="name" placeholder="Введите название">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Адрес магазина</label>
+                            <textarea class="form-control" name="address" rows="3" placeholder="Введите адрес"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Телефон</label>
+                            <input type="text" class="form-control" name="phone" placeholder="Введите телефон">
+                        </div>
+
+                        <button type="submit" class="btn btn-success">СОХРАНИТЬ</button>
+                        <a href="{% url 'shop_manage' %}" class="btn btn-secondary">ОТМЕНА</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ОТЛАДОЧНЫЙ СКРИПТ
+console.log('Форма загружена');
+document.querySelector('form').addEventListener('submit', function(e) {
+    console.log('Форма отправляется');
+    const name = document.querySelector('input[name="name"]').value;
+    const address = document.querySelector('textarea[name="address"]').value;
+    console.log('Данные:', {name, address});
+});
+</script>
+{% endblock %}

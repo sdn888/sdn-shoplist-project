@@ -27,7 +27,7 @@
                         </div>
                     {% endif %}
 
-                    <!-- УЛУЧШЕННАЯ ГАЛЕРЕЯ ДОПОЛНИТЕЛЬНЫХ ИЗОБРАЖЕНИЙ -->
+                    <!-- ГАЛЕРЕЯ ДОПОЛНИТЕЛЬНЫХ ИЗОБРАЖЕНИЙ -->
                     {% if product.images.all %}
                     <div class="mt-4">
                         <h6 class="text-muted mb-3">
@@ -84,20 +84,31 @@
                     </div>
 
                     <!-- Магазины -->
-                    {% if product.shop_addresses %}
+                    {% if product.shops.all %}
                     <div class="mb-4">
                         <h3 class="h5">📍 Где купить</h3>
                         <div class="bg-light rounded p-3">
-                            {% with addresses=product.shop_addresses.splitlines %}
-                                {% for address in addresses %}
-                                    {% if address.strip %}
-                                        <div class="mb-2">
-                                            <i class="bi bi-geo-alt text-primary"></i>
-                                            {{ address.strip }}
+                            {% for shop in product.shops.all %}
+                                <div class="mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-geo-alt text-primary mt-1 me-2"></i>
+                                        <div class="flex-grow-1">
+                                            <strong class="d-block">{{ shop.name }}</strong>
+                                            <span class="text-muted">{{ shop.address }}</span>
+                                            {% if shop.phone %}
+                                            <div class="mt-1">
+                                                <small class="text-muted">📞 {{ shop.phone }}</small>
+                                            </div>
+                                            {% endif %}
+                                            {% if shop.opening_hours %}
+                                            <div class="mt-1">
+                                                <small class="text-muted">🕒 {{ shop.opening_hours }}</small>
+                                            </div>
+                                            {% endif %}
                                         </div>
-                                    {% endif %}
-                                {% endfor %}
-                            {% endwith %}
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
                     </div>
                     {% endif %}
@@ -123,6 +134,16 @@
                             <a href="{% url 'add_to_cart' product.id %}" class="btn btn-primary ms-md-2">
                                 📦 В корзину
                             </a>
+                            <!-- Кнопки избранного -->
+                            {% if user_favorites %}
+                                <a href="{% url 'remove_from_favorite' product.id %}" class="btn btn-danger ms-md-2">
+                                    ❤️ В избранном
+                                </a>
+                            {% else %}
+                                <a href="{% url 'add_to_favorite' product.id %}" class="btn btn-outline-danger ms-md-2">
+                                    🤍 В избранное
+                                </a>
+                            {% endif %}
                         {% else %}
                             <a href="{% url 'login' %}?next={% url 'product_detail' product.id %}" class="btn btn-primary ms-md-2">
                                 📦 В корзину (требуется вход)
@@ -163,7 +184,6 @@
     function changeMainImage(imageUrl) {
         const mainImage = document.getElementById('main-product-image');
         if (mainImage) {
-            // Добавляем анимацию смены изображения
             mainImage.style.opacity = '0.7';
             setTimeout(() => {
                 mainImage.src = imageUrl;
@@ -171,7 +191,6 @@
             }, 150);
         }
 
-        // Подсвечиваем активную миниатюру
         const thumbnails = document.querySelectorAll('.gallery-thumbnail');
         thumbnails.forEach(thumb => {
             thumb.classList.remove('active');
@@ -181,7 +200,6 @@
         });
     }
 
-    // Автоматически активируем первую миниатюру при загрузке
     document.addEventListener('DOMContentLoaded', function() {
         const firstThumbnail = document.querySelector('.gallery-thumbnail');
         if (firstThumbnail) {

@@ -1,13 +1,8 @@
 from django.contrib import admin
-from .models import Product, Category, Cart, CartItem, ProductImage
+from django.contrib.auth import get_user_model
+from .models import Product, Category, Cart, CartItem, ProductImage, Shop, Favorite
 
-
-# Inline для изображений товара
-class ProductImageInline(admin.TabularInline):
-    model = ProductImage
-    extra = 1
-    fields = ('image', 'order', 'created_at')
-    readonly_fields = ('created_at',)
+User = get_user_model()
 
 
 @admin.register(Category)
@@ -18,21 +13,26 @@ class CategoryAdmin(admin.ModelAdmin):
     ordering = ('name',)
 
 
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 1
+    fields = ('image', 'order', 'created_at')
+    readonly_fields = ('created_at',)
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'price', 'created_by', 'created_at', 'is_active')
     list_filter = ('category', 'is_active', 'created_at')
     search_fields = ('name', 'description')
-
-    # ДОБАВЛЯЕМ INLINE ДЛЯ ИЗОБРАЖЕНИЙ
     inlines = [ProductImageInline]
 
     fieldsets = (
         (None, {
-            'fields': ('name', 'category', 'description', 'image', 'price')
+            'fields': ('name', 'category', 'description', 'image', 'price', 'shops')
         }),
         ('Дополнительно', {
-            'fields': ('shop_addresses', 'created_by', 'is_active'),
+            'fields': ('created_by', 'is_active'),
             'classes': ('collapse',)
         }),
     )
@@ -57,6 +57,20 @@ class ProductImageAdmin(admin.ModelAdmin):
 
     image_preview.allow_tags = True
     image_preview.short_description = 'Превью'
+
+
+@admin.register(Shop)
+class ShopAdmin(admin.ModelAdmin):
+    list_display = ('name', 'address', 'phone', 'owner', 'created_at')
+    search_fields = ('name', 'address')
+    list_filter = ('created_at', 'owner')
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ('user', 'product', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('user__username', 'product__name')
 
 
 @admin.register(Cart)

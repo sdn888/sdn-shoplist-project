@@ -5,8 +5,9 @@ register = template.Library()
 
 @register.filter
 def get_category(categories, category_id):
-    """Возвращает название категории по ID"""
+    """Получает название категории по ID"""
     try:
-        return categories.get(id=int(category_id)).name
-    except (Category.DoesNotExist, ValueError, AttributeError):
+        category = Category.objects.get(id=category_id)
+        return category.name
+    except Category.DoesNotExist:
         return "Неизвестная категория"

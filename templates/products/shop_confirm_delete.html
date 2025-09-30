@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0 text-danger">Удаление магазина</h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <i class="bi bi-exclamation-triangle" style="font-size: 3rem; color: #dc3545;"></i>
+                    </div>
+
+                    <h5>Вы уверены, что хотите удалить магазин?</h5>
+                    <p class="text-muted mb-4">
+                        <strong>"{{ shop.name }}"</strong><br>
+                        {{ shop.address }}
+                    </p>
+
+                    <p class="text-warning">
+                        ⚠️ Внимание: Это действие нельзя отменить. Все товары, связанные с этим магазином,
+                        будут отвязаны от него.
+                    </p>
+
+                    <form method="post" class="d-flex gap-2 justify-content-center">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Да, удалить</button>
+                        <a href="{% url 'shop_manage' %}" class="btn btn-outline-secondary">Отмена</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
