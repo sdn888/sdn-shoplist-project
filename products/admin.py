@@ -4,21 +4,18 @@ from .models import Product, Category, Cart, CartItem, ProductImage, Shop, Favor
 
 User = get_user_model()
 
-
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('name', 'parent', 'created_at')
     list_filter = ('parent',)
     search_fields = ('name',)
-    ordering = ('name',)
-
+    ordering = ('parent_id', 'name')  # Группировка в базе
 
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
     extra = 1
     fields = ('image', 'order', 'created_at')
     readonly_fields = ('created_at',)
-
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
@@ -40,8 +37,12 @@ class ProductAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         if not obj.pk:
             obj.created_by = request.user
+        # ВАЖНО: вызываем родительский метод БЕЗ изменений
         super().save_model(request, obj, form, change)
 
+    def save_related(self, request, form, formsets, change):
+        # Это обеспечит правильное сохранение ManyToMany поля shops
+        super().save_related(request, form, formsets, change)
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
@@ -58,20 +59,17 @@ class ProductImageAdmin(admin.ModelAdmin):
     image_preview.allow_tags = True
     image_preview.short_description = 'Превью'
 
-
 @admin.register(Shop)
 class ShopAdmin(admin.ModelAdmin):
     list_display = ('name', 'address', 'phone', 'owner', 'created_at')
     search_fields = ('name', 'address')
     list_filter = ('created_at', 'owner')
 
-
 @admin.register(Favorite)
 class FavoriteAdmin(admin.ModelAdmin):
     list_display = ('user', 'product', 'created_at')
     list_filter = ('created_at',)
     search_fields = ('user__username', 'product__name')
-
 
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
@@ -86,7 +84,6 @@ class CartAdmin(admin.ModelAdmin):
         return f"{obj.total_price()} ₽"
 
     total_price.short_description = 'Общая стоимость'
-
 
 @admin.register(CartItem)
 class CartItemAdmin(admin.ModelAdmin):

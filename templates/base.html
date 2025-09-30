@@ -67,6 +67,13 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'cart_view' %}">
                             🛒 Корзина
+                            {% if user.is_authenticated %}
+                                {% with user.cart.total_items as cart_count %}
+                                    {% if cart_count > 0 %}
+                                        <span class="badge bg-danger">{{ cart_count }}</span>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
                         </a>
                     </li>
 

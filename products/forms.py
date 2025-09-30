@@ -1,6 +1,7 @@
 from django import forms
 from .models import Product, Category, ProductImage, Shop
 
+
 class ShopForm(forms.ModelForm):
     class Meta:
         model = Shop
@@ -13,6 +14,7 @@ class ShopForm(forms.ModelForm):
             'latitude': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.000001'}),
             'longitude': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.000001'}),
         }
+
 
 class ProductForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -42,6 +44,21 @@ class ProductForm(forms.ModelForm):
 
         self.fields['category'].choices = get_category_choices()
 
+    # ДОБАВЛЕН ЭТОТ МЕТОД ДЛЯ СОХРАНЕНИЯ MANYTOMANY
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+
+        # Устанавливаем created_by если это новый товар
+        user = getattr(self, 'user', None)
+        if user and not instance.pk:
+            instance.created_by = user
+
+        if commit:
+            instance.save()
+            self.save_m2m()  # ← СОХРАНЯЕМ MANYTOMANY СВЯЗИ (магазины)
+
+        return instance
+
     class Meta:
         model = Product
         fields = ['name', 'category', 'description', 'image', 'price', 'shops', 'is_active']
@@ -53,6 +70,7 @@ class ProductForm(forms.ModelForm):
             'category': forms.Select(attrs={'class': 'form-control'}),
             'shops': forms.SelectMultiple(attrs={'class': 'form-control', 'style': 'height: 120px;'}),
         }
+
 
 class ProductImageForm(forms.ModelForm):
     class Meta:

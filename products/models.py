@@ -19,17 +19,27 @@ def product_gallery_image_path(instance, filename):
     return os.path.join('products', 'gallery', filename)
 
 
+class CategoryManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().order_by('parent_id', 'name')
+
+
 class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название категории')
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True,
                                verbose_name='Родительская категория')
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = CategoryManager()  # ← ДОБАВИТЬ ЭТУ СТРОКУ
+
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+        # ordering можно убрать если используем менеджер
 
     def __str__(self):
+        if self.parent:
+            return f"{self.parent.name} → {self.name}"
         return self.name
 
 
@@ -102,7 +112,6 @@ class Cart(models.Model):
 
     @property
     def total_items_property(self):
-        """Свойство для совместимости с шаблонами"""
         return self.total_items()
 
     def total_price(self):
@@ -110,7 +119,6 @@ class Cart(models.Model):
 
     @property
     def total_price_property(self):
-        """Свойство для совместимости с шаблонами"""
         return self.total_price()
 
     def __str__(self):
@@ -128,7 +136,6 @@ class CartItem(models.Model):
 
     @property
     def total_price_property(self):
-        """Свойство для совместимости с шаблонами"""
         return self.total_price()
 
     def __str__(self):
